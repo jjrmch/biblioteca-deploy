@@ -65,6 +65,23 @@ services:
       discovery-service:
         condition: service_healthy
 
+  # --- Customer ---
+  customer-service:
+    build: ../customer-service
+    container_name: customer-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/clientes
+      DB_USER: admin
+      DB_PASSWORD: admin123
+      EUREKA_URL: http://discovery-service:8761/eureka/
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+
   # --- Gateway ---
   gateway-service:
     build: ../gateway-service
