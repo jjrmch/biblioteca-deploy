@@ -94,5 +94,15 @@ services:
       discovery-service:
         condition: service_healthy
 
+  # --- Frontend ---
+  frontend:
+    build: ../biblioteca-frontend
+    container_name: biblioteca-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      gateway-service:
+        condition: service_started
+
 volumes:
   postgres-data:
