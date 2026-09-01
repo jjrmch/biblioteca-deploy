@@ -5,9 +5,9 @@ services:
     image: postgres:16
     container_name: biblioteca-postgres
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: biblioteca
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -36,10 +36,10 @@ services:
     build: ../catalog-service
     container_name: catalog-service
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/biblioteca
-      DB_USER: admin
-      DB_PASSWORD: admin123
-      EUREKA_URL: http://discovery-service:8761/eureka/
+      DB_URL: ${DB_URL_CATALOG}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      EUREKA_URL: ${EUREKA_URL}
     ports:
       - "8081:8081"
     depends_on:
@@ -53,12 +53,29 @@ services:
     build: ../transactions-service
     container_name: transactions-service
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/transacciones
-      DB_USER: admin
-      DB_PASSWORD: admin123
-      EUREKA_URL: http://discovery-service:8761/eureka/
+      DB_URL: ${DB_URL_TRANSACTIONS}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      EUREKA_URL: ${EUREKA_URL}
     ports:
       - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+
+  # --- Customer ---
+  customer-service:
+    build: ../customer-service
+    container_name: customer-service
+    environment:
+      DB_URL: ${DB_URL_CUSTOMER}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      EUREKA_URL: ${EUREKA_URL}
+    ports:
+      - "8083:8083"
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,12 +87,22 @@ services:
     build: ../gateway-service
     container_name: gateway-service
     environment:
-      EUREKA_URL: http://discovery-service:8761/eureka/
+      EUREKA_URL: ${EUREKA_URL}
     ports:
       - "8080:8080"
     depends_on:
       discovery-service:
         condition: service_healthy
+
+  # --- Frontend ---
+  frontend:
+    build: ../biblioteca-frontend
+    container_name: biblioteca-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      gateway-service:
+        condition: service_started
 
 volumes:
   postgres-data:
