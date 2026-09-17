@@ -1,3 +1,5 @@
 CREATE DATABASE transacciones;
 
 CREATE DATABASE clientes;
+
+CREATE DATABASE auth;
