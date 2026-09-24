@@ -14,7 +14,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d biblioteca"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -40,6 +40,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       EUREKA_URL: ${EUREKA_URL}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8081:8081"
     depends_on:
@@ -57,6 +58,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       EUREKA_URL: ${EUREKA_URL}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8082:8082"
     depends_on:
@@ -74,8 +76,29 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       EUREKA_URL: ${EUREKA_URL}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+
+  # --- Auth ---
+  auth-service:
+    build: ../auth-service
+    container_name: auth-service
+    environment:
+      DB_URL: ${DB_URL_AUTH}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      EUREKA_URL: ${EUREKA_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    ports:
+      - "8084:8084"
     depends_on:
       postgres:
         condition: service_healthy
@@ -88,6 +111,7 @@ services:
     container_name: gateway-service
     environment:
       EUREKA_URL: ${EUREKA_URL}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8080:8080"
     depends_on:
