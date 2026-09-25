@@ -1,5 +1,7 @@
 # Biblioteca Deploy
 
+![CI](https://github.com/jjrmch/biblioteca-deploy/actions/workflows/ci.yml/badge.svg)
+
 Despliegue de la plataforma de gestión de biblioteca con Docker Compose. Levanta el sistema completo con un solo comando: base de datos PostgreSQL, los seis microservicios Spring Cloud y el frontend.
 
 ## Qué levanta
