@@ -2,6 +2,7 @@
 
 ![CI](https://github.com/jjrmch/biblioteca-deploy/actions/workflows/ci.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/jjrmch/biblioteca-deploy?label=release&color=blue)](https://github.com/jjrmch/biblioteca-deploy/releases)
 ![Docker Compose](https://img.shields.io/badge/docker%20compose-stack-2496ED?logo=docker&logoColor=white)
 
 Punto de entrada de la **plataforma de gestión de biblioteca**: un sistema de microservicios **Spring Cloud** con frontend **React** que se levanta completo con un solo comando. Este repositorio orquesta la base de datos PostgreSQL, los seis microservicios y el panel web.
