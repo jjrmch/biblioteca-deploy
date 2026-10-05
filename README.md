@@ -1,8 +1,47 @@
 # Biblioteca Deploy
 
 ![CI](https://github.com/jjrmch/biblioteca-deploy/actions/workflows/ci.yml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Docker Compose](https://img.shields.io/badge/docker%20compose-stack-2496ED?logo=docker&logoColor=white)
 
-Despliegue de la plataforma de gestión de biblioteca con Docker Compose. Levanta el sistema completo con un solo comando: base de datos PostgreSQL, los seis microservicios Spring Cloud y el frontend.
+Punto de entrada de la **plataforma de gestión de biblioteca**: un sistema de microservicios **Spring Cloud** con frontend **React** que se levanta completo con un solo comando. Este repositorio orquesta la base de datos PostgreSQL, los seis microservicios y el panel web.
+
+## Capturas
+
+| Dashboard | Libros |
+|---|---|
+| ![Dashboard](docs/screenshots/02-dashboard.png) | ![Libros](docs/screenshots/03-libros.png) |
+
+| Ventas | Alquileres |
+|---|---|
+| ![Ventas](docs/screenshots/05-ventas.png) | ![Alquileres](docs/screenshots/06-alquileres.png) |
+
+## Arquitectura
+
+```mermaid
+flowchart LR
+    U["Browser (React)"] --> F["frontend (nginx)"]
+    F --> G["gateway-service"]
+    G --> A["auth-service"]
+    G --> C["catalog-service"]
+    G --> T["transactions-service"]
+    G --> CU["customer-service"]
+    A --> P[("PostgreSQL 16")]
+    C --> P
+    T --> P
+    CU --> P
+    A -.-> E["discovery-service (Eureka)"]
+    C -.-> E
+    T -.-> E
+    CU -.-> E
+    G -.-> E
+    T -->|OpenFeign| C
+    T -->|OpenFeign| CU
+```
+
+- El **frontend** habla solo con el gateway, que enruta por nombre (`lb://`) a cada servicio usando Eureka.
+- **auth-service** firma los JWT (HS256) y el resto de servicios los validan por su cuenta con el `JWT_SECRET` compartido.
+- **transactions-service** orquesta ventas, alquileres, reservas y multas llamando a catalog y customer con **OpenFeign**, propagando el token del usuario.
 
 ## Qué levanta
 
@@ -18,8 +57,6 @@ Despliegue de la plataforma de gestión de biblioteca con Docker Compose. Levant
 | biblioteca-frontend | `biblioteca-frontend` | 3000 |
 
 Los microservicios esperan a que PostgreSQL y Eureka estén sanos antes de arrancar (healthchecks con `pg_isready` y `wget`). El frontend sirve el build de producción con nginx y proxifica `/api` hacia el gateway.
-
-Todos los servicios comparten el mismo `JWT_SECRET`: auth-service firma los tokens y el gateway, catalog, customer y transactions los validan.
 
 ## Requisitos
 
@@ -80,23 +117,29 @@ El archivo `.env` (no versionado) define las credenciales y la configuración. V
 - `docker-compose.yml` — definición de los 8 servicios
 - `init-db.sql` — crea las bases de datos `transacciones`, `clientes` y `auth` (la de catálogo la crea PostgreSQL con `POSTGRES_DB`)
 - `scripts-libros.ps1` / `scripts-clientes.ps1` — seed de datos de ejemplo vía el gateway (autenticados)
+- `docs/screenshots/` — capturas del panel web
 - `.env.example` — plantilla de variables de entorno
 
 ## Repositorios del sistema
 
-- [discovery-service](https://github.com/jjrmch/discovery-service)
-- [gateway-service](https://github.com/jjrmch/gateway-service)
-- [catalog-service](https://github.com/jjrmch/catalog-service)
-- [transactions-service](https://github.com/jjrmch/transactions-service)
-- [customer-service](https://github.com/jjrmch/customer-service)
-- [auth-service](https://github.com/jjrmch/auth-service)
-- [biblioteca-frontend](https://github.com/jjrmch/biblioteca-frontend)
+| Repositorio | CI |
+|---|---|
+| [discovery-service](https://github.com/jjrmch/discovery-service) | ![CI](https://github.com/jjrmch/discovery-service/actions/workflows/ci.yml/badge.svg) |
+| [gateway-service](https://github.com/jjrmch/gateway-service) | ![CI](https://github.com/jjrmch/gateway-service/actions/workflows/ci.yml/badge.svg) |
+| [catalog-service](https://github.com/jjrmch/catalog-service) | ![CI](https://github.com/jjrmch/catalog-service/actions/workflows/ci.yml/badge.svg) |
+| [transactions-service](https://github.com/jjrmch/transactions-service) | ![CI](https://github.com/jjrmch/transactions-service/actions/workflows/ci.yml/badge.svg) |
+| [customer-service](https://github.com/jjrmch/customer-service) | ![CI](https://github.com/jjrmch/customer-service/actions/workflows/ci.yml/badge.svg) |
+| [auth-service](https://github.com/jjrmch/auth-service) | ![CI](https://github.com/jjrmch/auth-service/actions/workflows/ci.yml/badge.svg) |
+| [biblioteca-frontend](https://github.com/jjrmch/biblioteca-frontend) | ![CI](https://github.com/jjrmch/biblioteca-frontend/actions/workflows/ci.yml/badge.svg) |
+
+Los servicios backend suman **109 tests** (unitarios con JUnit 5 + Mockito e integración con Spring Boot + MockMvc + **Testcontainers** con PostgreSQL, incluido un test de concurrencia que prueba que el stock nunca queda negativo). Cada repositorio ejecuta su CI en GitHub Actions en cada push y pull request.
 
 ## Por mejorar
 
 - Los scripts de seed no son idempotentes: si se ejecutan dos veces, duplican los datos.
 - `docker compose up` reconstruye las imágenes Java desde cero (Maven sin caché de dependencias); se puede acelerar con un cache mount de BuildKit.
+- Falta un despliegue de demo online; hoy el stack se levanta en local.
 
 ## Licencia
 
-MIT
+MIT. Ver [LICENSE](LICENSE).
