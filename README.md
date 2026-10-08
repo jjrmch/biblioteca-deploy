@@ -133,7 +133,7 @@ El archivo `.env` (no versionado) define las credenciales y la configuración. V
 | [auth-service](https://github.com/jjrmch/auth-service) | ![CI](https://github.com/jjrmch/auth-service/actions/workflows/ci.yml/badge.svg) |
 | [biblioteca-frontend](https://github.com/jjrmch/biblioteca-frontend) | ![CI](https://github.com/jjrmch/biblioteca-frontend/actions/workflows/ci.yml/badge.svg) |
 
-Los servicios backend suman **109 tests** (unitarios con JUnit 5 + Mockito e integración con Spring Boot + MockMvc + **Testcontainers** con PostgreSQL, incluido un test de concurrencia que prueba que el stock nunca queda negativo). Cada repositorio ejecuta su CI en GitHub Actions en cada push y pull request.
+Los servicios backend suman **158 tests** (unitarios con JUnit 5 + Mockito e integración con Spring Boot + MockMvc + **Testcontainers** con PostgreSQL, incluido un test de concurrencia que prueba que el stock nunca queda negativo). Cada repositorio ejecuta su CI en GitHub Actions en cada push y pull request.
 
 ## Por mejorar
 
